@@ -1,0 +1,785 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Flux — Modern analytics infrastructure for teams who move fast. Real-time dashboards, AI anomaly detection, and enterprise-grade security.">
+<title>Flux — The Future of Team Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f3ee;
+    --acid: #c8ff00;
+    --mid: #1a1a2e;
+    --muted: #6b6b7a;
+    --card: #111118;
+    --border: rgba(255,255,255,0.07);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--ink);
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    backdrop-filter: blur(20px);
+    background: rgba(10,10,15,0.7);
+    border-bottom: 1px solid var(--border);
+    animation: slideDown 0.6s ease both;
+  }
+  @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: var(--acid);
+  }
+
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none; font-size: 0.9rem;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: #fff; }
+
+  .nav-cta {
+    background: var(--acid); color: var(--ink);
+    padding: 10px 22px; border-radius: 100px;
+    font-weight: 600; font-size: 0.875rem;
+    text-decoration: none; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,255,0,0.35); }
+
+  /* HAMBURGER */
+  .burger {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    z-index: 200;
+  }
+  .burger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--acid);
+    transition: 0.3s;
+  }
+  .burger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .burger.active span:nth-child(2) { opacity: 0; }
+  .burger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+  /* MOBILE OVERLAY */
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: translateY(-20px);
+    backdrop-filter: blur(20px);
+  }
+  .mobile-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
+  }
+  .mobile-overlay a {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .mobile-overlay a:hover { color: var(--acid); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,255,0,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(99,102,241,0.15) 0%, transparent 50%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(200,255,0,0.1); border: 1px solid rgba(200,255,0,0.25);
+    color: var(--acid); padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem; font-weight: 500; letter-spacing: 0.04em;
+    margin-bottom: 28px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acid); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800; line-height: 0.95;
+    letter-spacing: -0.04em;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.7s 0.35s ease both;
+  }
+  .hero h1 em { font-style: normal; color: var(--acid); }
+
+  .hero-sub {
+    max-width: 520px; margin: 24px auto 0;
+    font-size: 1.1rem; color: rgba(255,255,255,0.55);
+    line-height: 1.7; font-weight: 300;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.7s 0.5s ease both;
+  }
+
+  .hero-btns {
+    display: flex; gap: 12px; margin-top: 40px;
+    flex-wrap: wrap; justify-content: center;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.7s 0.65s ease both;
+  }
+  .btn-primary {
+    background: var(--acid); color: var(--ink);
+    padding: 14px 32px; border-radius: 100px;
+    font-weight: 600; font-size: 1rem;
+    text-decoration: none; transition: all 0.2s;
+    border: none; cursor: pointer;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(200,255,0,0.4); }
+  .btn-ghost {
+    background: transparent; color: rgba(255,255,255,0.7);
+    padding: 14px 32px; border-radius: 100px;
+    font-size: 1rem; font-weight: 500;
+    text-decoration: none; transition: all 0.2s;
+    border: 1px solid rgba(255,255,255,0.15); cursor: pointer;
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 64px;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.7s 0.8s ease both;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--acid); }
+  .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.4); margin-top: 4px; letter-spacing: 0.05em; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* DASHBOARD PREVIEW */
+  .dashboard-section {
+    padding: 0 24px 120px;
+    display: flex; justify-content: center;
+  }
+
+  .dashboard-wrapper {
+    max-width: 1100px; width: 100%;
+    position: relative;
+    animation: fadeUp 0.8s 1s ease both;
+  }
+
+  .dashboard-glow {
+    position: absolute; inset: -40px;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(200,255,0,0.08), transparent 70%);
+    z-index: 0;
+  }
+
+  .dashboard-frame {
+    position: relative; z-index: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+  }
+
+  .dashboard-topbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+  .tab-bar { display: flex; gap: 2px; margin-left: 16px; }
+  .tab {
+    padding: 5px 16px; border-radius: 6px;
+    font-size: 0.78rem; color: rgba(255,255,255,0.4);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tab.active { background: rgba(200,255,0,0.12); color: var(--acid); }
+
+  .dashboard-body { display: grid; grid-template-columns: 200px 1fr; min-height: 440px; }
+
+  .dash-sidebar {
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+  }
+  .sidebar-section { padding: 8px 16px; margin-bottom: 4px; }
+  .sidebar-label { font-size: 0.65rem; color: rgba(255,255,255,0.3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px;
+    font-size: 0.8rem; color: rgba(255,255,255,0.5);
+    cursor: pointer; transition: all 0.15s; margin-bottom: 2px;
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+  .sidebar-item.active { background: rgba(200,255,0,0.1); color: var(--acid); }
+  .sidebar-icon { width: 16px; height: 16px; opacity: 0.7; }
+
+  .dash-main { padding: 24px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+    transition: border-color 0.2s;
+  }
+  .kpi-card:hover { border-color: rgba(200,255,0,0.2); }
+  .kpi-label { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-bottom: 8px; letter-spacing: 0.04em; }
+  .kpi-val { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; color: #fff; }
+  .kpi-delta { font-size: 0.7rem; color: #4ade80; margin-top: 4px; }
+  .kpi-delta.neg { color: #f87171; }
+
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+  .chart-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+  }
+  .chart-title { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .bar {
+    width: 100%; border-radius: 4px 4px 0 0;
+    background: rgba(200,255,0,0.15);
+    transition: height 0.4s ease;
+    position: relative; overflow: hidden;
+  }
+  .bar::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--acid);
+  }
+  .bar.highlight { background: rgba(200,255,0,0.35); }
+  .bar-lbl { font-size: 0.6rem; color: rgba(255,255,255,0.3); }
+
+  .donut-wrap { display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+  .donut { width: 80px; height: 80px; border-radius: 50%; }
+
+  .legend { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* FEATURES */
+  .features { padding: 80px 24px; max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--acid); margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
+    max-width: 560px;
+  }
+
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 56px; }
+  .feature-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    padding: 32px;
+    transition: all 0.25s; position: relative; overflow: hidden;
+  }
+  .feature-card:hover { background: rgba(255,255,255,0.04); }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200,255,0,0.4), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(200,255,0,0.08); border: 1px solid rgba(200,255,0,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-bottom: 20px;
+  }
+  .feature-card h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+  .feature-card p { font-size: 0.875rem; color: rgba(255,255,255,0.45); line-height: 1.65; }
+
+  /* PRICING */
+  .pricing { padding: 80px 24px; background: rgba(255,255,255,0.015); }
+  .pricing-inner { max-width: 1000px; margin: 0 auto; }
+  .pricing-header { text-align: center; margin-bottom: 56px; }
+  .pricing-toggle {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.05); border-radius: 100px;
+    padding: 4px; margin-top: 24px;
+  }
+  .toggle-opt {
+    padding: 7px 20px; border-radius: 100px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+    color: rgba(255,255,255,0.5);
+  }
+  .toggle-opt.active { background: var(--acid); color: var(--ink); font-weight: 600; }
+  .toggle-save { font-size: 0.7rem; color: var(--acid); background: rgba(200,255,0,0.1); padding: 3px 8px; border-radius: 100px; }
+
+  .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .plan {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 36px; position: relative; transition: border-color 0.25s;
+  }
+  .plan:hover { border-color: rgba(255,255,255,0.15); }
+  .plan.featured { border-color: rgba(200,255,0,0.3); background: rgba(200,255,0,0.03); }
+  .plan-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: var(--acid); color: var(--ink); font-size: 0.72rem; font-weight: 700;
+    padding: 4px 14px; border-radius: 100px; letter-spacing: 0.04em; white-space: nowrap;
+  }
+  .plan-name { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 12px; }
+  .plan-price { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .plan-price span { font-size: 1rem; font-weight: 400; color: rgba(255,255,255,0.4); }
+  .plan-desc { font-size: 0.82rem; color: rgba(255,255,255,0.4); margin-bottom: 28px; line-height: 1.5; }
+  .plan-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+  .plan-features li { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+  .check { color: var(--acid); font-size: 0.9rem; }
+  .plan-btn {
+    width: 100%; padding: 13px;
+    border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; border: none;
+  }
+  .plan-btn.outline {
+    background: transparent; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.7);
+  }
+  .plan-btn.outline:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+  .plan-btn.solid { background: var(--acid); color: var(--ink); }
+  .plan-btn.solid:hover { box-shadow: 0 8px 24px rgba(200,255,0,0.35); transform: translateY(-1px); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 48px 40px;
+  }
+  .footer-inner { max-width: 1100px; margin: 0 auto; }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
+  .footer-brand p { font-size: 0.85rem; color: rgba(255,255,255,0.4); line-height: 1.65; margin-top: 12px; max-width: 240px; }
+  .footer-col h4 { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 16px; color: rgba(255,255,255,0.5); }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { text-decoration: none; font-size: 0.85rem; color: rgba(255,255,255,0.35); transition: color 0.2s; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--border); }
+  .footer-copy { font-size: 0.8rem; color: rgba(255,255,255,0.25); }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links, .nav-cta { display: none; }
+    .burger { display: flex; }
+    .hero h1 { font-size: clamp(2.5rem, 10vw, 4rem); }
+    .hero-stats { gap: 28px; }
+    .dashboard-body { grid-template-columns: 1fr; }
+    .dash-sidebar { display: none; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .charts-row { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .plans { grid-template-columns: 1fr; gap: 16px; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+    .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  }
+
+  @media (max-width: 480px) {
+    .kpi-row { grid-template-columns: 1fr; }
+    .hero-stats { gap: 16px; }
+    .stat-num { font-size: 1.5rem; }
+  }
+
+  /* SCROLL ANIMATIONS */
+  .reveal {
+    opacity: 0; transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">flux.</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#">Blog</a></li>
+  </ul>
+  <a href="#" class="nav-cta">Start free →</a>
+  <div class="burger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-overlay" id="mobileMenu">
+  <a href="#features" onclick="toggleMenu()">Features</a>
+  <a href="#pricing" onclick="toggleMenu()">Pricing</a>
+  <a href="#" onclick="toggleMenu()">Docs</a>
+  <a href="#" onclick="toggleMenu()">Blog</a>
+  <a href="#" class="btn-primary" style="margin-top: 20px;">Start free →</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="badge"><span class="badge-dot"></span> Now in public beta — join 8,000+ teams</div>
+  <h1>Analytics that<br><em>move fast.</em></h1>
+  <p class="hero-sub">Flux gives your team a single source of truth — live dashboards, smart alerts, and AI-powered insights without the complexity.</p>
+
+  <div class="hero-btns">
+    <a href="#" class="btn-primary">Start free trial</a>
+    <a href="#" class="btn-ghost">▶ Watch demo</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">8K+</div><div class="stat-label">Teams worldwide</div></div>
+    <div class="stat"><div class="stat-num">2.4B</div><div class="stat-label">Events tracked daily</div></div>
+    <div class="stat"><div class="stat-num">99.9%</div><div class="stat-label">Uptime SLA</div></div>
+    <div class="stat"><div class="stat-num">4.9★</div><div class="stat-label">G2 rating</div></div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="dashboard-section">
+  <div class="dashboard-wrapper">
+    <div class="dashboard-glow"></div>
+    <div class="dashboard-frame">
+      <div class="dashboard-topbar">
+        <div class="dot red"></div>
+        <div class="dot yellow"></div>
+        <div class="dot green"></div>
+        <div class="tab-bar">
+          <div class="tab active">Overview</div>
+          <div class="tab">Revenue</div>
+          <div class="tab">Users</div>
+        </div>
+      </div>
+      <div class="dashboard-body">
+        <div class="dash-sidebar">
+          <div class="sidebar-section">
+            <div class="sidebar-label">Main</div>
+            <div class="sidebar-item active">
+              <svg class="sidebar-icon" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+              Dashboard
+            </div>
+            <div class="sidebar-item">
+              <svg class="sidebar-icon" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><polyline points="2,12 6,7 9,10 14,4"/></svg>
+              Analytics
+            </div>
+            <div class="sidebar-item">
+              <svg class="sidebar-icon" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+              Users
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-label">Insights</div>
+            <div class="sidebar-item">
+              <svg class="sidebar-icon" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><path d="M8 2l1.5 4.5H14l-3.7 2.7 1.4 4.3L8 11 4.3 13.5l1.4-4.3L2 6.5h4.5z"/></svg>
+              Reports
+            </div>
+            <div class="sidebar-item">
+              <svg class="sidebar-icon" fill="none" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+              Alerts
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-main">
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <div class="kpi-label">MRR</div>
+              <div class="kpi-val">$84.2K</div>
+              <div class="kpi-delta">↑ 12.4% vs last mo</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Active Users</div>
+              <div class="kpi-val">14,802</div>
+              <div class="kpi-delta">↑ 8.1%</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Churn Rate</div>
+              <div class="kpi-val">1.8%</div>
+              <div class="kpi-delta neg">↑ 0.3%</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">NPS Score</div>
+              <div class="kpi-val">72</div>
+              <div class="kpi-delta">↑ 4pts</div>
+            </div>
+          </div>
+
+          <div class="charts-row">
+            <div class="chart-card">
+              <div class="chart-title">Revenue — last 8 months</div>
+              <div class="bar-chart">
+                <div class="bar-wrap"><div class="bar" style="height:45%"></div><div class="bar-lbl">Sep</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:55%"></div><div class="bar-lbl">Oct</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:48%"></div><div class="bar-lbl">Nov</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:70%"></div><div class="bar-lbl">Dec</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:62%"></div><div class="bar-lbl">Jan</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:78%"></div><div class="bar-lbl">Feb</div></div>
+                <div class="bar-wrap"><div class="bar" style="height:85%"></div><div class="bar-lbl">Mar</div></div>
+                <div class="bar-wrap"><div class="bar highlight" style="height:100%"></div><div class="bar-lbl">Apr</div></div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-title">Traffic sources</div>
+              <div class="donut-wrap">
+                <svg class="donut" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="6"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#c8ff00" stroke-width="6" stroke-dasharray="52 48" stroke-dashoffset="25" transform="rotate(-90 18 18)"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#6366f1" stroke-width="6" stroke-dasharray="28 72" stroke-dashoffset="-27" transform="rotate(-90 18 18)"/>
+                  <circle cx="18" cy="18" r="14" fill="none" stroke="#f472b6" stroke-width="6" stroke-dasharray="20 80" stroke-dashoffset="-55" transform="rotate(-90 18 18)"/>
+                </svg>
+              </div>
+              <div class="legend">
+                <div class="legend-item"><div class="legend-dot" style="background:#c8ff00"></div>Organic — 52%</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>Paid — 28%</div>
+                <div class="legend-item"><div class="legend-dot" style="background:#f472b6"></div>Referral — 20%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features reveal" id="features">
+  <div class="section-label">Why Flux</div>
+  <div class="section-title">Every metric.<br>One platform.</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Real-time streaming</h3>
+      <p>Events hit your dashboard in under 200ms. No batch jobs, no lag — see your data exactly as it happens.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <h3>AI anomaly detection</h3>
+      <p>Flux learns your baselines and pings you the moment something looks off — before your users notice.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧩</div>
+      <h3>100+ integrations</h3>
+      <p>Connect Stripe, Salesforce, HubSpot, Postgres, and more in minutes. Your stack, our platform.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <h3>Enterprise-grade security</h3>
+      <p>SOC 2 Type II certified. Single-tenant cloud, SSO, role-based access, and audit logs included.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Custom dashboards</h3>
+      <p>Drag-and-drop builder with 40+ chart types. Share with stakeholders with a single link.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌍</div>
+      <h3>Global CDN delivery</h3>
+      <p>Infrastructure across 15 regions ensures sub-50ms query latency no matter where your team is.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing reveal" id="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-header">
+      <div class="section-label">Pricing</div>
+      <div class="section-title" style="margin:0 auto;text-align:center;">Simple, honest pricing.</div>
+      <div class="pricing-toggle">
+        <div class="toggle-opt active">Monthly</div>
+        <div class="toggle-opt">Annually <span class="toggle-save">Save 20%</span></div>
+      </div>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$0<span>/mo</span></div>
+        <div class="plan-desc">Perfect for solo builders and side projects just getting off the ground.</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Up to 100K events/mo</li>
+          <li><span class="check">✓</span> 3 dashboards</li>
+          <li><span class="check">✓</span> 7-day data retention</li>
+          <li><span class="check">✓</span> Community support</li>
+        </ul>
+        <button class="plan-btn outline">Get started free</button>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-badge">MOST POPULAR</div>
+        <div class="plan-name">Growth</div>
+        <div class="plan-price">$49<span>/mo</span></div>
+        <div class="plan-desc">For teams serious about understanding their product and users.</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Up to 5M events/mo</li>
+          <li><span class="check">✓</span> Unlimited dashboards</li>
+          <li><span class="check">✓</span> 90-day retention</li>
+          <li><span class="check">✓</span> AI anomaly detection</li>
+          <li><span class="check">✓</span> Slack & email alerts</li>
+          <li><span class="check">✓</span> Priority support</li>
+        </ul>
+        <button class="plan-btn solid">Start 14-day trial</button>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-desc">For organizations that need scale, compliance, and dedicated support.</div>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><span class="check">✓</span> Unlimited events</li>
+          <li><span class="check">✓</span> 2-year retention</li>
+          <li><span class="check">✓</span> SSO & SCIM</li>
+          <li><span class="check">✓</span> Custom SLA</li>
+          <li><span class="check">✓</span> Dedicated CSM</li>
+          <li><span class="check">✓</span> On-prem deploy option</li>
+        </ul>
+        <button class="plan-btn outline">Talk to sales</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo">flux.</div>
+        <p>Modern analytics infrastructure for teams who move fast and care about data.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Developers</h4>
+        <ul>
+          <li><a href="#">Docs</a></li>
+          <li><a href="#">API Reference</a></li>
+          <li><a href="#">SDKs</a></li>
+          <li><a href="#">Status</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 Flux Analytics, Inc. All rights reserved.</div>
+      <div class="footer-copy">Privacy · Terms · Cookies</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Pricing toggle
+  document.querySelectorAll('.toggle-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.toggle-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // Update prices based on toggle
+      const isAnnual = btn.textContent.includes('Annually');
+      const growthPrice = document.querySelector('.plan.featured .plan-price');
+      if (isAnnual) {
+        growthPrice.innerHTML = '$39<span>/mo</span>';
+      } else {
+        growthPrice.innerHTML = '$49<span>/mo</span>';
+      }
+    });
+  });
+
+  // Mobile Menu Toggle
+  function toggleMenu() {
+    const burger = document.querySelector('.burger');
+    const overlay = document.getElementById('mobileMenu');
+    burger.classList.toggle('active');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
+  }
+
+  // Animate bars on scroll
+  const dashObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      document.querySelectorAll('.bar').forEach((bar, i) => {
+        const h = bar.style.height;
+        bar.style.height = '0';
+        setTimeout(() => { bar.style.height = h; }, i * 60);
+      });
+      dashObserver.disconnect();
+    }
+  }, { threshold: 0.3 });
+  dashObserver.observe(document.querySelector('.bar-chart'));
+</script>
+</body>
+</html>
